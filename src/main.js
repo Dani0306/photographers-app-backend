@@ -2,7 +2,6 @@ import express from "express"
 import morgan from "morgan"
 import cors from "cors"
 import connect from "./database.js"
-import userRouter from "./routes/userRoutes.js"
 import photographerRoutes from "./routes/photographerRoutes.js"
 import reservationRoutes from "./routes/ReservationsRoutes.js"
 
@@ -17,7 +16,6 @@ app.use(morgan("common"))
 
 // routes prefix
 
-app.use("/auth/user", userRouter)
 app.use("/auth/photographer", photographerRoutes)
 app.use("/reservations", reservationRoutes)
 

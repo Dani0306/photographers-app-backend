@@ -2,18 +2,34 @@ import { Router } from "express"
 import Fotografo from "../models/Fotografo.js";
 import bcrypt from "bcrypt"
 
-
 const photographerRoutes = Router();
 
+// DELETE ONE
+
+photographerRoutes.delete("/:id", async (req, res) => {
+    const { id } = req.params
+    const deleted = await Fotografo.findByIdAndDelete(id)
+    return res.status(200).json({ deleted })
+
+})
+
+
+// GET ALL PHOTOGRAPHERS 
+
+photographerRoutes.get("/all", async (req, res) => {
+    const photographers = await Fotografo.find();
+    return res.status(200).json({ photographers })
+
+})
 
 // GET PROFILE
 
-photographerRoutes.get("/:id", async (req, res) => {
-    const { id } = req.params
+photographerRoutes.get("/:email", async (req, res) => {
+    const { email } = req.params
 
-    const user = await Fotografo.findById(id);
+    const user = await Fotografo.findOne({ email });
 
-    if(!user) return res.status(404).json({ message: "Usuario no encontrado." })
+    if(!user) return res.status(200).json({ user: null })
 
     return res.status(200).json({ user })
 
@@ -25,35 +41,26 @@ photographerRoutes.post("/register", async (req, res) => {
     const { 
         nombre, 
         email,
-        contraseña,
+        image_url,
         precio_por_hora,
-        portafolio, 
         servicios, 
         ubicacion,
-        calificacion,
         redes_sociales,
         telefono
       } = req.body
 
 
-    const user = await Fotografo.findOne({ email });
-
-    if(user) return res.status(401).json({ message: "El usuario ya existe, intenta iniciando sesión." })
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(contraseña, salt)
-
     const newFotografo = new Fotografo({
         nombre, 
         email, 
-        contraseña: hashedPassword, 
-        precio_por_hora, 
-        portafolio, 
-        servicios, 
+        precio_por_hora: Number(precio_por_hora), 
+        portafolio: [], 
+        servicios: servicios.split(" "), 
         ubicacion, 
-        calificacion, 
-        redes_sociales, 
-        telefono
+        calificacion: 0, 
+        redes_sociales: redes_sociales.split(" "), 
+        telefono, 
+        image_url
     })
 
     const savedFotografo = await newFotografo.save();
@@ -62,21 +69,22 @@ photographerRoutes.post("/register", async (req, res) => {
 
 })
 
-// PHOTOGRAPHERS LOGIN
+// MODIFY A PHOTOGRAPHER PROFILE
 
+photographerRoutes.post("/modify", async (req, res) => {
+    const { 
+        email,
+        precio_por_hora,
+        servicios, 
+        ubicacion,
+        redes_sociales,
+        telefono
+      } = req.body
 
-photographerRoutes.post("/login", async (req, res) => {
-    const { email, contraseña } = req.body;
+    const modifiedPhotograher = await Fotografo.findOneAndUpdate({ email }, { precio_por_hora, servicios: servicios.split(", "), ubicacion, redes_sociales: redes_sociales.split(", "), telefono }, { new: true });
 
-    const user = await Fotografo.findOne({ email });
+    return res.status(200).json({ user: modifiedPhotograher })
 
-    if(!user) return res.status(400).json({ message: "Usuario o contraseña incorrect@." })
-
-    const matched = await bcrypt.compare(contraseña, user.contraseña);
-
-    if(!matched) return res.status(400).json({ message: "Usuario o contraseña incorrect@." })
-
-    return res.status(200).json({ user })
 })
 
 export default photographerRoutes

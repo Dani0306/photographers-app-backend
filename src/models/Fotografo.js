@@ -4,15 +4,13 @@ const { Schema } = mongoose;
 
 const fotografoSchema = new Schema({
     nombre: String,
+    image_url: String,
     email: String ,
-    contraseña: String,
     precio_por_hora: Number,
     portafolio: [String],
     servicios: [String],
-    reservas: [mongoose.Types.ObjectId],
-    fechas_reservadas: [Date],
     ubicacion: String,
-    calificacion: Number,
+    calificacion: { type: Number, default: 0 },
     redes_sociales: [String],
     telefono: String
 }, {
